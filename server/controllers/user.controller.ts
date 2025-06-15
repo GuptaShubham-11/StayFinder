@@ -128,9 +128,14 @@ const signOut = asyncHandler(async (req: AuthenticatedRequest, res) => {
     .json(new ApiResponse(201, 'User signed out successfully.'));
 });
 
+const currentUser = asyncHandler(async (req: AuthenticatedRequest, res) => {
+  res.status(200).json(new ApiResponse(200, 'User fetched successfully.', req.user));
+});
+
 export const userController = {
   generateAccessAndRefreshTokens,
   signUp,
   signIn,
   signOut,
+  currentUser,
 };

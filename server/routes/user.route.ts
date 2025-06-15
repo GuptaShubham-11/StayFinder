@@ -12,5 +12,6 @@ router.use(verifyJWT);
 
 // protected routes
 router.post('/signout', userController.signOut);
+router.get('/current-user', userController.currentUser);
 
 export default router;
