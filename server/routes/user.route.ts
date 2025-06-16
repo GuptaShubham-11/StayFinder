@@ -7,6 +7,7 @@ const router = Router();
 // public routes
 router.post('/signup', userController.signUp);
 router.post('/signin', userController.signIn);
+router.post('/refresh-access-token', userController.refreshAccessToken);
 
 router.use(verifyJWT);
 

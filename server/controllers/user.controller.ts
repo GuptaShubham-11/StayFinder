@@ -1,3 +1,4 @@
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import User from '../models/user.model';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
@@ -132,10 +133,52 @@ const currentUser = asyncHandler(async (req: AuthenticatedRequest, res) => {
   res.status(200).json(new ApiResponse(200, 'User fetched successfully.', req.user));
 });
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!refreshToken) {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    throw new ApiError(401, 'No refresh token found');
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as JwtPayload;
+  } catch (error) {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    throw new ApiError(401, 'Invalid or expired refresh token');
+  }
+
+  const user = await User.findById(decoded._id);
+  if (!user) {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    throw new ApiError(400, 'User not found');
+  }
+
+  const accessToken = user.generateAccessToken();
+
+  res
+    .status(200)
+    .cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+    })
+    .json(
+      new ApiResponse(200, 'Access token refreshed successfully', accessToken)
+    );
+});
+
 export const userController = {
   generateAccessAndRefreshTokens,
+  refreshAccessToken,
+  currentUser,
   signUp,
   signIn,
   signOut,
-  currentUser,
 };
