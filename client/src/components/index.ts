@@ -1,9 +1,5 @@
-import Signup from "./SignUp";
-import Signin from "./SignIn";
+import Signup from './SignUp';
+import Signin from './SignIn';
+import Spinner from './Spinner';
 
-export {
-    Signup,
-    Signin
-};
-
-
+export { Signup, Signin, Spinner };

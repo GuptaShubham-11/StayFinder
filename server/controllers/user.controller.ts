@@ -131,7 +131,9 @@ const signOut = asyncHandler(async (req: AuthenticatedRequest, res) => {
 });
 
 const currentUser = asyncHandler(async (req: AuthenticatedRequest, res) => {
-  res.status(200).json(new ApiResponse(200, 'User fetched successfully.', req.user));
+  res
+    .status(200)
+    .json(new ApiResponse(200, 'User fetched successfully.', req.user));
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
