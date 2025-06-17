@@ -1,13 +1,15 @@
-'use client';
-
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Mail, Lock } from 'lucide-react';
-import type { SigninInput } from '@/schemas/singinValidation';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { signinValidation } from '@/schemas/singinValidation';
-import { Link } from 'react-router-dom';
+import type { SigninInput } from '@/schemas/singinValidation';
+import { Link, useNavigate } from 'react-router-dom';
+import { Spinner } from './';
+import { userApi } from '@/api/userApi';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/authStore';
 
 
 export default function Signin() {
@@ -23,9 +25,20 @@ export default function Signin() {
         },
     });
 
+    const { login } = useAuthStore.getState();
+    const navigate = useNavigate();
+
     const onSubmit = async (data: SigninInput) => {
-        console.log('Signin data:', data);
-        // TODO: Send to backend
+        try {
+            const response = await userApi.signIn(data);
+            if (response.statusCode < 400) {
+                toast.success('Logged in successfully!');
+                login(response.data.user);
+                navigate('/listings');
+            }
+        } catch (error: any) {
+            toast.error(error.message);
+        }
     };
 
     return (
@@ -43,7 +56,7 @@ export default function Signin() {
                         <Input
                             type="email"
                             placeholder="you@example.com"
-                            className="bg-bg text-txt"
+                            className="bg-blue-50 text-txt"
                             {...register('email')}
                         />
                         {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
@@ -58,7 +71,7 @@ export default function Signin() {
                         <Input
                             type="password"
                             placeholder="********"
-                            className="bg-bg text-txt"
+                            className="bg-blue-50 text-txt"
                             {...register('password')}
                         />
                         {errors.password && (
@@ -71,7 +84,7 @@ export default function Signin() {
                         className="w-full bg-pri text-white hover:bg-pri/90 cursor-pointer"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Signging in...' : 'Sign In'}
+                        {isSubmitting ? <Spinner /> : 'Sign In'}
                     </Button>
                 </form>
 

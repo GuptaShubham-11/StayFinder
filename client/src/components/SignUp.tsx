@@ -1,5 +1,3 @@
-'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
@@ -7,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Mail, Lock, UserCheck } from 'lucide-react';
 import { signupValidation } from '@/schemas/signupValidation';
 import type { SignupInput } from '@/schemas/signupValidation';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Spinner } from './';
+import { userApi } from '@/api/userApi';
+import { toast } from 'sonner';
 
 export default function Signup() {
     const {
@@ -23,9 +24,18 @@ export default function Signup() {
         },
     });
 
+    const navigate = useNavigate();
+
     const onSubmit = async (data: SignupInput) => {
-        console.log('Signup data:', data);
-        // TODO: Send to backend
+        try {
+            const response = await userApi.signUp(data);
+            if (response.statusCode < 400) {
+                toast.success('Account created successfully!');
+                navigate('/signin');
+            }
+        } catch (error: any) {
+            toast.error(error.message);
+        }
     };
 
     return (
@@ -43,7 +53,7 @@ export default function Signup() {
                         <Input
                             type="email"
                             placeholder="you@example.com"
-                            className="bg-bg text-txt"
+                            className="bg-blue-50 text-txt"
                             {...register('email')}
                         />
                         {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
@@ -58,7 +68,7 @@ export default function Signup() {
                         <Input
                             type="password"
                             placeholder="********"
-                            className="bg-bg text-txt"
+                            className="bg-blue-50 text-txt"
                             {...register('password')}
                         />
                         {errors.password && (
@@ -73,7 +83,7 @@ export default function Signup() {
                             Role
                         </label>
                         <select
-                            className="w-full bg-bg text-txt border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pri"
+                            className="w-full bg-blue-50 text-txt border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pri"
                             {...register('role')}
                         >
                             <option value="user">User</option>
@@ -87,13 +97,13 @@ export default function Signup() {
                         className="w-full bg-pri text-white hover:bg-pri/90"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Creating...' : 'Sign Up'}
+                        {isSubmitting ? <Spinner /> : 'Sign Up'}
                     </Button>
                 </form>
 
                 <p className="text-center text-sm text-sec">
                     Already have an account?{' '}
-                    <Link to="/signin" className="text-acc cursor-pointer underline">Log in</Link>
+                    <Link to="/signin" className="text-acc cursor-pointer underline">Sign in</Link>
                 </p>
             </div>
         </div>
