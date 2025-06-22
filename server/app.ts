@@ -24,10 +24,12 @@ app.use(cookieParser());
 import userRoutes from './routes/user.route';
 import listingRoutes from './routes/listing.route';
 import bookingRoutes from './routes/booking.route';
+import wishlistRoutes from './routes/wishlists.route';
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/listings', listingRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/wishlists', wishlistRoutes);
 
 // Global error handler
 app.use(
