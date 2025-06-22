@@ -63,7 +63,8 @@ const ListingSchema = new Schema<IListing>(
       type: [String],
       default: [],
       validate: {
-        validator: (arr: string[]) => arr.every((img) => typeof img === 'string'),
+        validator: (arr: string[]) =>
+          arr.every((img) => typeof img === 'string'),
         message: 'All images must be strings (URLs or filenames)',
       },
     },
