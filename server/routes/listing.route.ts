@@ -1,16 +1,27 @@
 import { Router } from 'express';
 import { listingController } from '../controllers/listing.controller';
 import { verifyJWT } from '../middlewares/auth.middleware';
+import { upload } from '../middlewares/multer.middleware';
 
 const router = Router();
 
 router.use(verifyJWT);
 
 // protected routes
-router.post('/create-listing', listingController.createListing);
+router.post(
+  '/create-listing',
+  upload.array('images', 6),
+  listingController.createListing
+);
 router.get('/all-listings', listingController.getAllListings);
 router.delete('/delete-listing/:id', listingController.deleteListing);
 router.get('/listing/:id', listingController.getListingById);
-router.put('/update-listing/:id', listingController.updateListing);
+router.put(
+  '/update-listing/:id',
+  upload.array('images', 6),
+  listingController.updateListing
+);
+router.get('/user-listings', listingController.getHostListings);
+router.get('/host-listings', listingController.getHostListings);
 
 export default router;
