@@ -9,31 +9,52 @@ import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 
 const createBooking = asyncHandler(async (req: AuthenticatedRequest, res) => {
   const validated = bookingValidation.safeParse(req.body);
-
   if (!validated.success) {
     throw new ApiError(400, zodErrorFormater(validated));
   }
 
-  const { listing, checkIn, checkOut, totalPrice } = validated.data;
+  const { listingId, checkIn, checkOut } = validated.data;
 
-  // Validate dates
+  // Check: Check-in < Check-out
   if (checkIn >= checkOut) {
     throw new ApiError(400, 'Check-in must be before check-out');
   }
 
-  // Check for overlapping bookings
+  // Check: Max stay limit (30 days)
+  const diffDays =
+    (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
+    (1000 * 60 * 60 * 24);
+
+  if (diffDays > 30) {
+    throw new ApiError(400, 'Cannot book more than 30 days');
+  }
+
+  // Check: Listing exists
+  const foundListing = await Listing.findById(listingId);
+  if (!foundListing) {
+    throw new ApiError(404, 'Listing not found');
+  }
+
+  // Check: Overlapping bookings
   const overlappingBooking = await Booking.findOne({
-    listing,
-    $or: [{ checkIn: { $lt: checkOut }, checkOut: { $gt: checkIn } }],
+    listingId,
+    $and: [{ checkIn: { $lt: checkOut } }, { checkOut: { $gt: checkIn } }],
   });
 
   if (overlappingBooking) {
+    console.warn(
+      `[Booking Conflict] User ${req.user?._id} tried booking ${listingId} from ${checkIn} to ${checkOut}`
+    );
     throw new ApiError(400, 'Listing already booked for selected dates');
   }
 
+  // Calculate total price
+  const totalPrice = foundListing.price * Math.ceil(diffDays);
+
+  // Save booking
   const booking = await Booking.create({
     user: req.user?._id,
-    listing,
+    listingId,
     checkIn,
     checkOut,
     totalPrice,
@@ -43,9 +64,10 @@ const createBooking = asyncHandler(async (req: AuthenticatedRequest, res) => {
 });
 
 const getUserBookings = asyncHandler(async (req: AuthenticatedRequest, res) => {
-  const bookings = await Booking.find({ user: req.user?._id }).populate(
-    'listing'
-  );
+  const bookings = await Booking.find({ user: req.user?._id })
+    .populate('listingId')
+    .lean();
+
   res.status(200).json(new ApiResponse(200, 'User bookings fetched', bookings));
 });
 
@@ -54,14 +76,28 @@ const getHostBookings = asyncHandler(async (req: AuthenticatedRequest, res) => {
   const listingIds = listings.map((l) => l._id);
 
   const bookings = await Booking.find({
-    listing: { $in: listingIds },
-  }).populate('user listing');
+    listingId: { $in: listingIds },
+  })
+    .populate('user')
+    .populate('listingId')
+    .lean();
 
   res.status(200).json(new ApiResponse(200, 'Host bookings fetched', bookings));
+});
+
+const getBookingsByListing = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const bookings = await Booking.find({ listingId: id });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, 'Bookings for listing fetched', bookings));
 });
 
 export const bookingController = {
   createBooking,
   getUserBookings,
   getHostBookings,
+  getBookingsByListing,
 };
