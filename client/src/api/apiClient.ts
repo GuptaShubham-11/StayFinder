@@ -9,7 +9,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 5000,
+  timeout: 30000,
 });
 
 let isRefreshing = false;
@@ -72,8 +72,6 @@ apiClient.interceptors.response.use(
         );
 
         const newAccessToken = res.data?.data;
-
-        console.log('newAccessToken', newAccessToken);
 
         if (newAccessToken) {
           apiClient.defaults.headers.common['Authorization'] =
