@@ -12,6 +12,7 @@ import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 const options = {
   httpOnly: true,
   secure: true,
+  sameSite: 'none' as const
 };
 
 const generateAccessAndRefreshTokens = async (
