@@ -5,6 +5,9 @@ import { upload } from '../middlewares/multer.middleware';
 
 const router = Router();
 
+router.get('/all-listings', listingController.getAllListings);
+router.get('/listing/:id', listingController.getListingById);
+
 router.use(verifyJWT);
 
 // protected routes
@@ -13,9 +16,7 @@ router.post(
   upload.array('images', 6),
   listingController.createListing
 );
-router.get('/all-listings', listingController.getAllListings);
 router.delete('/delete-listing/:id', listingController.deleteListing);
-router.get('/listing/:id', listingController.getListingById);
 router.put(
   '/update-listing/:id',
   upload.array('images', 6),
