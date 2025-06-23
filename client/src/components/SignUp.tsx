@@ -116,7 +116,10 @@ export default function Signup() {
           <Link to="/signin" className="text-acc cursor-pointer underline">
             Sign in
           </Link>
-
+          {' ||  '}
+          <Link to="/" className="text-acc cursor-pointer underline">
+            Go to Home
+          </Link>
         </p>
       </div>
     </div>
