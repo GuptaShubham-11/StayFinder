@@ -123,7 +123,7 @@ cd StayFinder
 ### 1.2 .Env File
 
 ```bash
-Set up .env file from .env.sample
+Set up .env.local file from .env.sample
 ```
 
 ### 2. Setup Server
