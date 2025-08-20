@@ -7,12 +7,13 @@ import { zodErrorFormater } from '../utils/zodErrorFormater';
 import { signUpValidation } from '../schemas/signUp.schema';
 import { signInValidation } from '../schemas/signIn.schema';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
+import { CookieOptions } from 'express';
 
 // Cookie Option
-const options = {
+const options: CookieOptions = {
   httpOnly: true,
   secure: true,
-  sameSite: 'none' as const
+  sameSite: 'none',
 };
 
 const generateAccessAndRefreshTokens = async (

@@ -89,7 +89,7 @@ export default function MyBookings() {
                   {new Date(booking.checkOut).toLocaleDateString()}
                 </p>
                 <p className="text-sm font-medium text-gray-900">
-                  <span className="font-semibold text-acc">Total Price: ₹{booking.listingId.price}</span>
+                  <span className="font-semibold text-acc">Per Day: ₹{booking.listingId.price}</span>
                 </p>
               </div>
             </Link>
